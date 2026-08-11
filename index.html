@@ -9,8 +9,14 @@
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; background-color: #222; color: white; margin: 0; padding: 10px; }
-        /* CSS to ensure video fits on mobile screens properly */
+        body { 
+            font-family: Arial, sans-serif; 
+            text-align: center; 
+            background-color: #222; 
+            color: white; 
+            margin: 0; 
+            padding: 10px; 
+        }
         canvas { 
             border: 2px solid #444; 
             border-radius: 10px; 
@@ -19,11 +25,23 @@
             max-width: 100%;
             height: auto;
         }
-        #output { font-size: 24px; margin-top: 15px; color: #00ff00; font-weight: bold; }
+        #output { 
+            font-size: 24px; 
+            margin-top: 15px; 
+            color: #00ff00; 
+            font-weight: bold; 
+        }
         #input-text { 
-            margin-top: 15px; font-size: 20px; padding: 10px; 
-            width: 80%; max-width: 600px; border-radius: 5px; 
-            background: #333; color: white; border: 1px solid #555;
+            margin-top: 15px; 
+            font-size: 20px; 
+            padding: 10px; 
+            width: 80%; 
+            max-width: 600px; 
+            border-radius: 5px; 
+            background: #333; 
+            color: white; 
+            border: 1px solid #555;
+            text-align: center;
         }
     </style>
 </head>
@@ -60,7 +78,7 @@
             // Stagger rows slightly like a real keyboard
             let startX = 20 + (rowIndex * 20); 
             
-            row.forEach((char, colIndex) => {
+            row.forEach((char) => {
                 let w = keySize;
                 // Make Space and Del keys slightly wider
                 if(char === 'SPACE') w = keySize * 3;
@@ -78,12 +96,12 @@
             });
         });
 
+        // Calculate distance between Index Finger Tip and Thumb Tip
         function calculateDistance(p1, p2) {
             return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
         }
 
-        // To prevent multiple types from a single pinch, we use a debounce flag
-        let isPinching = false;
+        let isPinching = false; // Debounce flag to prevent multiple inputs from one pinch
 
         function onResults(results) {
             canvasCtx.save();
@@ -105,7 +123,6 @@
                 canvasCtx.stroke();
                 
                 canvasCtx.fillStyle = 'white';
-                // Adjust font size based on key type
                 canvasCtx.font = (key.label.length > 1) ? "14px Arial" : "20px Arial";
                 let textX = (key.label.length > 1) ? key.x + 5 : key.x + 15;
                 canvasCtx.fillText(key.label, textX, key.y + 30);
@@ -115,14 +132,16 @@
             if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
                 for (const landmarks of results.multiHandLandmarks) {
                     
+                    // Draw Hand Wireframe
                     drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS, {color: '#00FF00', lineWidth: 2});
                     drawLandmarks(canvasCtx, landmarks, {color: '#FF0000', lineWidth: 1, radius: 2});
 
+                    // Landmark 8 (Index Tip), Landmark 4 (Thumb Tip)
                     let indexTip = { x: landmarks[8].x * canvasElement.width, y: landmarks[8].y * canvasElement.height };
                     let thumbTip = { x: landmarks[4].x * canvasElement.width, y: landmarks[4].y * canvasElement.height };
 
                     let pinchDist = calculateDistance(indexTip, thumbTip);
-                    let currentPinch = pinchDist < 30;
+                    let currentPinch = pinchDist < 30; // Threshold for pinch
 
                     // Hover Detection
                     keys.forEach(key => {
@@ -150,16 +169,17 @@
                         }
                     });
                     
-                    isPinching = currentPinch; // Update pinch state for next frame
+                    isPinching = currentPinch; // Update pinch state
                 }
             } else {
-                isPinching = false;
+                isPinching = false; // Reset if hand leaves frame
             }
             
             outputText.innerText = "Key Hover: " + hoveredKey;
             canvasCtx.restore();
         }
 
+        // Initialize MediaPipe Hands
         const hands = new Hands({locateFile: (file) => {
             return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
         }});
@@ -172,14 +192,14 @@
         });
         hands.onResults(onResults);
 
-        // --- CAMERA FIX: facingMode: 'environment' forces the back camera ---
+        // Initialize Camera (facingMode: 'environment' forces back camera)
         const camera = new Camera(videoElement, {
             onFrame: async () => {
                 await hands.send({image: videoElement});
             },
             width: 640,
             height: 480,
-            facingMode: 'environment' // THIS ENFORCES BACK CAMERA
+            facingMode: 'environment' 
         });
         camera.start();
     </script>
