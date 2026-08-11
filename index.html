@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR Keyboard Demo</title>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #222; color: white; }
+        canvas { border: 2px solid #444; border-radius: 10px; margin-top: 20px; background-color: black; }
+        #output { font-size: 24px; margin-top: 15px; color: #00ff00; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h2>Virtual Paper Keyboard</h2>
+    <div id="output">Key Pressed: NONE</div>
+    
+    <video id="input_video" style="display: none;"></video>
+    <canvas id="output_canvas" width="640" height="480"></canvas>
+
+    <script>
+        const videoElement = document.getElementById('input_video');
+        const canvasElement = document.getElementById('output_canvas');
+        const canvasCtx = canvasElement.getContext('2d');
+        const outputText = document.getElementById('output');
+
+        // Virtual Keyboard Layout (X, Y, Width, Height, KeyLabel)
+        const keys = [
+            { x: 100, y: 300, w: 80, h: 80, label: 'A' },
+            { x: 200, y: 300, w: 80, h: 80, label: 'B' },
+            { x: 300, y: 300, w: 80, h: 80, label: 'C' },
+            { x: 400, y: 300, w: 80, h: 80, label: 'D' }
+        ];
+
+        // Function to calculate distance between two points (for Pinch detection)
+        function calculateDistance(p1, p2) {
+            return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
+        }
+
+        // Main processing function called every frame
+        function onResults(results) {
+            // Clear previous frame
+            canvasCtx.save();
+            canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+            
+            // Draw Camera Stream
+            canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+
+            let pressedKey = "NONE";
+
+            // Draw Virtual Keyboard
+            keys.forEach(key => {
+                canvasCtx.beginPath();
+                canvasCtx.rect(key.x, key.y, key.w, key.h);
+                canvasCtx.fillStyle = 'rgba(255, 255, 255, 0.3)'; // Semi-transparent white
+                canvasCtx.fill();
+                canvasCtx.lineWidth = 3;
+                canvasCtx.strokeStyle = 'white';
+                canvasCtx.stroke();
+                
+                canvasCtx.fillStyle = 'white';
+                canvasCtx.font = "30px Arial";
+                canvasCtx.fillText(key.label, key.x + 25, key.y + 50);
+            });
+
+            // Process Hand Landmarks
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                for (const landmarks of results.multiHandLandmarks) {
+                    
+                    // Draw Hand Skeleton
+                    drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS, {color: '#00FF00', lineWidth: 3});
+                    drawLandmarks(canvasCtx, landmarks, {color: '#FF0000', lineWidth: 2});
+
+                    // Landmark 8 is Index Finger Tip, Landmark 4 is Thumb Tip
+                    // Coordinates are normalized (0 to 1), so multiply by canvas width/height
+                    let indexTip = {
+                        x: landmarks[8].x * canvasElement.width,
+                        y: landmarks[8].y * canvasElement.height
+                    };
+                    
+                    let thumbTip = {
+                        x: landmarks[4].x * canvasElement.width,
+                        y: landmarks[4].y * canvasElement.height
+                    };
+
+                    // Check for Pinch (Click) - Distance threshold is approx 30 pixels
+                    let pinchDistance = calculateDistance(indexTip, thumbTip);
+                    let isClicking = pinchDistance < 30;
+
+                    if (isClicking) {
+                        // Draw visual indicator for click
+                        canvasCtx.beginPath();
+                        canvasCtx.arc(indexTip.x, indexTip.y, 15, 0, 2 * Math.PI);
+                        canvasCtx.fillStyle = 'yellow';
+                        canvasCtx.fill();
+
+                        // Check Collision with Keys
+                        keys.forEach(key => {
+                            if (indexTip.x >= key.x && indexTip.x <= (key.x + key.w) &&
+                                indexTip.y >= key.y && indexTip.y <= (key.y + key.h)) {
+                                pressedKey = key.label;
+                                
+                                // Highlight pressed key
+                                canvasCtx.beginPath();
+                                canvasCtx.rect(key.x, key.y, key.w, key.h);
+                                canvasCtx.fillStyle = 'rgba(0, 255, 0, 0.6)';
+                                canvasCtx.fill();
+                            }
+                        });
+                    }
+                }
+            }
+            
+            outputText.innerText = "Key Pressed: " + pressedKey;
+            canvasCtx.restore();
+        }
+
+        // Initialize MediaPipe Hands
+        const hands = new Hands({locateFile: (file) => {
+            return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+        }});
+        
+        hands.setOptions({
+            maxNumHands: 1,
+            modelComplexity: 1,
+            minDetectionConfidence: 0.7,
+            minTrackingConfidence: 0.7
+        });
+        
+        hands.onResults(onResults);
+
+        // Initialize Camera
+        const camera = new Camera(videoElement, {
+            onFrame: async () => {
+                await hands.send({image: videoElement});
+            },
+            width: 640,
+            height: 480
+        });
+        camera.start();
+    </script>
+</body>
+</html>
