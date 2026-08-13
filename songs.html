@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TOTALLY 90's // Society Dot Net</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bungee&family=Space+Mono:wght@400;700&family=VT323&display=swap');
+
+  :root{
+    --hot-pink:#ff2ea8;
+    --acid-teal:#00e0c6;
+    --grape:#7b2ff7;
+    --mustard:#ffcf3f;
+    --ink:#12071f;
+    --paper:#f3ecd8;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+
+  html,body{
+    height:100%;
+    background:var(--ink);
+    color:var(--paper);
+    font-family:'Space Mono', monospace;
+    overflow-x:hidden;
+  }
+
+  /* ===== BACKGROUND ===== */
+  #bg{
+    position:fixed; inset:0; z-index:-3;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(123,47,247,0.35), transparent 45%),
+      radial-gradient(circle at 80% 30%, rgba(0,224,198,0.25), transparent 50%),
+      radial-gradient(circle at 50% 90%, rgba(255,46,168,0.3), transparent 50%),
+      linear-gradient(180deg, #1a0a2e 0%, #12071f 60%, #05010a 100%);
+  }
+  #grid{
+    position:fixed; inset:0; z-index:-2;
+    background-image:
+      linear-gradient(rgba(0,224,198,0.18) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,224,198,0.18) 1px, transparent 1px);
+    background-size:44px 44px;
+    transform:perspective(500px) rotateX(60deg) scale(2.2);
+    transform-origin:center bottom;
+    position:fixed; bottom:0; left:0; right:0; height:60vh;
+    animation:gridmove 6s linear infinite;
+    opacity:0.55;
+  }
+  @keyframes gridmove{ from{background-position:0 0;} to{background-position:0 44px;} }
+
+  .scanlines{
+    position:fixed; inset:0; z-index:50; pointer-events:none;
+    background:repeating-linear-gradient(180deg, rgba(0,0,0,0.15) 0px, rgba(0,0,0,0.15) 1px, transparent 2px, transparent 4px);
+    mix-blend-mode:overlay;
+  }
+  .grain{
+    position:fixed; inset:0; z-index:49; pointer-events:none; opacity:0.05;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* floating shapes (Memphis confetti) */
+  .shape{ position:fixed; z-index:-1; opacity:0.7; pointer-events:none; animation:float 9s ease-in-out infinite; }
+  @keyframes float{ 0%,100%{transform:translateY(0) rotate(0deg);} 50%{transform:translateY(-30px) rotate(15deg);} }
+
+  /* ===== HEADER ===== */
+  header{
+    text-align:center;
+    padding:60px 20px 20px;
+    position:relative;
+  }
+  .badge{
+    display:inline-block;
+    font-family:'VT323', monospace;
+    font-size:18px;
+    letter-spacing:4px;
+    color:var(--acid-teal);
+    border:1px solid var(--acid-teal);
+    padding:4px 14px;
+    border-radius:20px;
+    margin-bottom:18px;
+    background:rgba(0,224,198,0.08);
+  }
+  .badge::before{ content:"● "; color:#4dff88; animation:blink 1.2s steps(2) infinite; }
+  @keyframes blink{ 50%{opacity:0.2;} }
+
+  h1{
+    font-family:'Bungee', cursive;
+    font-size:clamp(2.6rem, 9vw, 6.5rem);
+    line-height:0.95;
+    background:linear-gradient(90deg, var(--hot-pink), var(--mustard), var(--acid-teal), var(--grape));
+    background-size:300% auto;
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    animation:hue 6s linear infinite;
+    text-shadow:0 0 40px rgba(255,46,168,0.25);
+    text-transform:uppercase;
+  }
+  @keyframes hue{ to{ background-position:300% center; } }
+
+  h1 span{ display:block; }
+
+  .subtitle{
+    font-family:'VT323', monospace;
+    font-size:clamp(1.1rem, 2.6vw, 1.6rem);
+    color:var(--mustard);
+    margin-top:14px;
+    letter-spacing:2px;
+  }
+
+  .tagbar{
+    margin-top:22px;
+    display:flex; flex-wrap:wrap; gap:10px; justify-content:center;
+  }
+  .tag{
+    font-size:11px;
+    padding:5px 12px;
+    border-radius:3px;
+    background:rgba(255,255,255,0.06);
+    border:1px dashed rgba(255,255,255,0.25);
+    color:var(--paper);
+    letter-spacing:1px;
+  }
+
+  /* ===== CENTRAL VISUAL: BOOMBOX ===== */
+  .stage{
+    display:flex; justify-content:center; align-items:center;
+    padding:40px 20px 10px;
+    position:relative;
+  }
+  .boombox-wrap{
+    position:relative;
+    animation:hover 4s ease-in-out infinite;
+  }
+  @keyframes hover{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(-14px);} }
+
+  svg#boombox{ width:min(90vw, 560px); height:auto; filter:drop-shadow(0 30px 40px rgba(0,0,0,0.6)); }
+
+  .cassette-spin{ transform-origin:center; animation:spin 2.2s linear infinite; }
+  @keyframes spin{ to{ transform:rotate(360deg);} }
+  .eq-bar{ transform-origin:bottom; animation:eq 0.9s ease-in-out infinite; }
+
+  /* ===== QUOTES ===== */
+  .quote-box{
+    max-width:640px;
+    margin:30px auto 10px;
+    text-align:center;
+    padding:0 20px;
+    min-height:90px;
+  }
+  .quote-box p{
+    font-family:'VT323', monospace;
+    font-size:clamp(1.3rem,3.2vw,1.9rem);
+    color:var(--acid-teal);
+    text-shadow:0 0 12px rgba(0,224,198,0.5);
+    transition:opacity 0.6s ease, transform 0.6s ease;
+  }
+  .quote-box .cite{
+    display:block;
+    font-family:'Space Mono', monospace;
+    font-size:12px;
+    color:var(--mustard);
+    margin-top:8px;
+    letter-spacing:2px;
+  }
+
+  /* ===== ARTIFACT GRID ===== */
+  .artifacts{
+    max-width:1000px;
+    margin:50px auto;
+    padding:0 24px;
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(190px,1fr));
+    gap:18px;
+  }
+  .card{
+    background:rgba(255,255,255,0.04);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:10px;
+    padding:18px;
+    backdrop-filter:blur(6px);
+    transition:transform 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+    cursor:default;
+  }
+  .card:hover{
+    transform:translateY(-6px) rotate(-1deg);
+    border-color:var(--hot-pink);
+    background:rgba(255,46,168,0.08);
+  }
+  .card .icon{ font-size:26px; margin-bottom:8px; display:block;}
+  .card h3{ font-family:'Bungee'; font-size:0.85rem; color:var(--mustard); margin-bottom:6px; letter-spacing:1px;}
+  .card p{ font-size:12px; line-height:1.5; color:rgba(243,236,216,0.75);}
+
+  /* ===== TICKER ===== */
+  .ticker{
+    border-top:1px solid rgba(255,255,255,0.15);
+    border-bottom:1px solid rgba(255,255,255,0.15);
+    background:rgba(0,0,0,0.35);
+    padding:10px 0;
+    overflow:hidden;
+    white-space:nowrap;
+    margin-top:40px;
+  }
+  .ticker-track{
+    display:inline-block;
+    font-family:'VT323', monospace;
+    font-size:1.2rem;
+    color:var(--acid-teal);
+    animation:ticker 26s linear infinite;
+    padding-left:100%;
+  }
+  @keyframes ticker{ to{ transform:translateX(-100%);} }
+
+  /* ===== INTERACTION HINT ===== */
+  .interact-hint{
+    text-align:center;
+    font-family:'VT323', monospace;
+    font-size:1.1rem;
+    color:rgba(243,236,216,0.6);
+    margin:34px auto 160px;
+    max-width:500px;
+    padding:0 20px;
+  }
+  .interact-hint b{ color:var(--hot-pink); }
+  kbd{
+    background:rgba(255,255,255,0.1);
+    border:1px solid rgba(255,255,255,0.3);
+    border-radius:4px;
+    padding:2px 8px;
+    font-family:'Space Mono';
+  }
+
+  /* pager popup */
+  #pager{
+    position:fixed; top:20px; right:20px; z-index:80;
+    background:var(--mustard); color:#1a0a2e;
+    font-family:'VT323', monospace; font-size:1.1rem;
+    padding:10px 16px; border-radius:6px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.4);
+    transform:translateX(140%);
+    transition:transform 0.5s cubic-bezier(.68,-0.55,.27,1.55);
+    max-width:260px;
+  }
+  #pager.show{ transform:translateX(0); }
+
+  /* ===== MUSIC PLAYER ===== */
+  #player{
+    position:fixed; left:50%; bottom:22px; transform:translateX(-50%);
+    width:min(94vw, 480px);
+    background:rgba(20,8,35,0.55);
+    border:1px solid rgba(255,255,255,0.18);
+    border-radius:20px;
+    backdrop-filter:blur(18px) saturate(160%);
+    -webkit-backdrop-filter:blur(18px) saturate(160%);
+    box-shadow:0 20px 50px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.05);
+    padding:14px 18px;
+    z-index:60;
+  }
+  .player-top{ display:flex; align-items:center; gap:12px; }
+  .art{
+    width:46px; height:46px; border-radius:10px; flex:none;
+    background:conic-gradient(from 0deg, var(--hot-pink), var(--grape), var(--acid-teal), var(--mustard), var(--hot-pink));
+    animation:spin 4s linear infinite;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 14px rgba(255,46,168,0.5);
+  }
+  .art::after{ content:"◉"; color:#12071f; font-size:18px; }
+  .track-meta{ flex:1; min-width:0; }
+  .track-name{ font-size:13px; font-weight:700; color:var(--paper); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .track-sub{ font-size:10px; color:var(--acid-teal); letter-spacing:1px; margin-top:2px; }
+
+  .controls{ display:flex; align-items:center; gap:10px; flex:none; }
+  .controls button{
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.2);
+    color:var(--paper);
+    width:34px; height:34px;
+    border-radius:50%;
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:background 0.2s, transform 0.15s;
+    font-size:13px;
+  }
+  .controls button:hover{ background:var(--hot-pink); transform:scale(1.08); }
+  #playBtn{ width:40px; height:40px; background:var(--acid-teal); color:#12071f; border:none; }
+  #playBtn:hover{ background:var(--mustard); }
+
+  .progress-row{ display:flex; align-items:center; gap:8px; margin-top:10px; }
+  .time{ font-size:10px; color:rgba(243,236,216,0.6); font-family:'Space Mono'; width:32px; }
+  .bar{
+    flex:1; height:6px; border-radius:4px; background:rgba(255,255,255,0.12);
+    position:relative; cursor:pointer; overflow:hidden;
+  }
+  .bar-fill{
+    position:absolute; left:0; top:0; bottom:0; width:0%;
+    background:linear-gradient(90deg, var(--hot-pink), var(--acid-teal));
+    border-radius:4px;
+  }
+
+  #yt-hidden{ position:absolute; width:1px; height:1px; opacity:0; pointer-events:none; }
+
+  footer{
+    text-align:center; font-family:'VT323'; font-size:13px;
+    color:rgba(243,236,216,0.4); padding:20px; padding-bottom:160px;
+  }
+
+  @media (max-width:520px){
+    .player-top{ flex-wrap:wrap; }
+    .controls{ order:3; width:100%; justify-content:center; margin-top:8px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation:none !important; transition:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div id="bg"></div>
+<div id="grid"></div>
+<div class="scanlines"></div>
+<div class="grain"></div>
+
+<!-- floating memphis shapes -->
+<svg class="shape" style="top:12%; left:6%; width:40px;" viewBox="0 0 100 100"><polygon points="50,0 100,100 0,100" fill="none" stroke="#ffcf3f" stroke-width="6"/></svg>
+<svg class="shape" style="top:65%; left:4%; width:36px; animation-delay:1s;" viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="none" stroke="#00e0c6" stroke-width="6"/></svg>
+<svg class="shape" style="top:20%; right:7%; width:44px; animation-delay:2s;" viewBox="0 0 100 100"><rect x="15" y="15" width="70" height="70" fill="none" stroke="#ff2ea8" stroke-width="6" transform="rotate(20 50 50)"/></svg>
+<svg class="shape" style="top:75%; right:8%; width:34px; animation-delay:3s;" viewBox="0 0 100 100"><polygon points="50,5 95,95 5,95" fill="#7b2ff7" opacity="0.5"/></svg>
+
+<header>
+  <div class="badge">SOCIETY.NET // NOW LOADING</div>
+  <h1><span>RADICALLY</span><span>RAD 90's</span></h1>
+  <div class="subtitle">// as seen on TV, felt on dial-up, worn as a scrunchie //</div>
+  <div class="tagbar">
+    <span class="tag">☎ Please Hold, Modem Connecting...</span>
+    <span class="tag">✎ Be Kind, Rewind</span>
+    <span class="tag">✦ As If!</span>
+    <span class="tag">☺ Talk To The Hand</span>
+  </div>
+</header>
+
+<div class="stage">
+  <div class="boombox-wrap">
+    <svg id="boombox" viewBox="0 0 560 320" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#2c1149"/>
+          <stop offset="100%" stop-color="#160726"/>
+        </linearGradient>
+      </defs>
+      <rect x="20" y="60" width="520" height="200" rx="22" fill="url(#body)" stroke="#ff2ea8" stroke-width="3"/>
+      <rect x="20" y="40" width="80" height="230" rx="14" fill="#160726" stroke="#00e0c6" stroke-width="3"/>
+      <rect x="460" y="40" width="80" height="230" rx="14" fill="#160726" stroke="#00e0c6" stroke-width="3"/>
+      <circle cx="60" cy="150" r="26" fill="#0d0417" stroke="#ffcf3f" stroke-width="4"/>
+      <circle cx="500" cy="150" r="26" fill="#0d0417" stroke="#ffcf3f" stroke-width="4"/>
+      <circle cx="60" cy="150" r="12" fill="#7b2ff7"/>
+      <circle cx="500" cy="150" r="12" fill="#7b2ff7"/>
+
+      <!-- cassette deck -->
+      <rect x="150" y="95" width="260" height="120" rx="10" fill="#0d0417" stroke="#ffcf3f" stroke-width="3"/>
+      <rect x="168" y="112" width="224" height="86" rx="6" fill="#1c0c30"/>
+      <circle class="cassette-spin" cx="220" cy="155" r="24" fill="none" stroke="#ff2ea8" stroke-width="4" stroke-dasharray="6 6"/>
+      <circle class="cassette-spin" cx="340" cy="155" r="24" fill="none" stroke="#00e0c6" stroke-width="4" stroke-dasharray="6 6"/>
+      <circle cx="220" cy="155" r="6" fill="#ffcf3f"/>
+      <circle cx="340" cy="155" r="6" fill="#ffcf3f"/>
+      <text x="280" y="196" text-anchor="middle" font-family="VT323, monospace" font-size="13" fill="#7b2ff7">SIDE A ▸ MIX TAPE '96</text>
+
+      <!-- EQ bars -->
+      <g id="eqGroup">
+        <rect class="eq-bar" x="150" y="240" width="8" height="20" fill="#ff2ea8"/>
+        <rect class="eq-bar" x="165" y="230" width="8" height="30" fill="#ffcf3f" style="animation-delay:.1s"/>
+        <rect class="eq-bar" x="180" y="220" width="8" height="40" fill="#00e0c6" style="animation-delay:.2s"/>
+        <rect class="eq-bar" x="195" y="235" width="8" height="25" fill="#7b2ff7" style="animation-delay:.3s"/>
+        <rect class="eq-bar" x="210" y="215" width="8" height="45" fill="#ff2ea8" style="animation-delay:.15s"/>
+        <rect class="eq-bar" x="360" y="225" width="8" height="35" fill="#00e0c6" style="animation-delay:.25s"/>
+        <rect class="eq-bar" x="375" y="238" width="8" height="22" fill="#ffcf3f" style="animation-delay:.05s"/>
+        <rect class="eq-bar" x="390" y="218" width="8" height="42" fill="#7b2ff7" style="animation-delay:.35s"/>
+      </g>
+      <text x="280" y="30" text-anchor="middle" font-family="Bungee, cursive" font-size="20" fill="#ffcf3f" transform="rotate(-2 280 30)">BOOM ★ BOX</text>
+    </svg>
+  </div>
+</div>
+
+<div class="quote-box">
+  <p id="quoteText">"Whatever."</p>
+  <span class="cite" id="quoteCite">— every teenager, 1996</span>
+</div>
+
+<section class="artifacts">
+  <div class="card"><span class="icon">💿</span><h3>MIX TAPES</h3><p>Painstakingly recorded off the radio, DJ talk-over included. Rewound with a pencil when it jammed.</p></div>
+  <div class="card"><span class="icon">📟</span><h3>PAGERS</h3><p>143 meant "I love you." 07734 upside down meant something else entirely.</p></div>
+  <div class="card"><span class="icon">🖥️</span><h3>DIAL-UP</h3><p>The screech of AOL connecting. "You've Got Mail." Don't pick up the phone.</p></div>
+  <div class="card"><span class="icon">🩳</span><h3>JNCO JEANS</h3><p>Wide enough to hide a skateboard. Paired with a Trapper Keeper and body glitter.</p></div>
+  <div class="card"><span class="icon">📼</span><h3>BLOCKBUSTER</h3><p>Friday night ritual. Be kind, rewind, or face the wrath of the late fee.</p></div>
+  <div class="card"><span class="icon">🎮</span><h3>NINTENDO 64</h3><p>Blowing into cartridges. Four-player split screen 'til 2am on GoldenEye.</p></div>
+</section>
+
+<div class="ticker">
+  <div class="ticker-track">
+    ✦ TALK TO THE HAND ✦ AS IF! ✦ TAKE A CHILL PILL ✦ ALL THAT AND A BAG OF CHIPS ✦ PSYCH! ✦ DA BOMB ✦ NOT! ✦ FRESH ✦ WHATEVER ✦ TALK TO THE HAND ✦ AS IF! ✦ TAKE A CHILL PILL ✦ ALL THAT AND A BAG OF CHIPS ✦
+  </div>
+</div>
+
+<div class="interact-hint">
+  Press <kbd>SPACE</kbd> or click the boombox to <b>drop the beat</b> — cranks the EQ into overdrive for a sec. Try it. Word to your mother.
+</div>
+
+<footer>© 1999 SOCIETY.NET — Best viewed in Netscape Navigator, 800×600</footer>
+
+<div id="pager">📟 NEW PAGE: 07734 — call me back!</div>
+
+<!-- ===== MUSIC PLAYER ===== -->
+<div id="player">
+  <div class="player-top">
+    <div class="art"></div>
+    <div class="track-meta">
+      <div class="track-name" id="trackName">Loading 90's Playlist…</div>
+      <div class="track-sub" id="trackSub">SIDE A</div>
+    </div>
+    <div class="controls">
+      <button id="prevBtn" title="Previous">⏮</button>
+      <button id="playBtn" title="Play/Pause">▶</button>
+      <button id="nextBtn" title="Next">⏭</button>
+    </div>
+  </div>
+  <div class="progress-row">
+    <span class="time" id="curTime">0:00</span>
+    <div class="bar" id="bar"><div class="bar-fill" id="barFill"></div></div>
+    <span class="time" id="durTime">0:00</span>
+  </div>
+</div>
+
+<div id="yt-hidden"><div id="ytplayer"></div></div>
+
+<script>
+/* ===== rotating quotes ===== */
+const quotes = [
+  ["\"Whatever.\"", "— every teenager, 1996"],
+  ["\"As if!\"", "— Cher Horowitz, Clueless"],
+  ["\"You've got mail!\"", "— AOL, every single night"],
+  ["\"Talk to the hand.\"", "— the cafeteria, circa '95"],
+  ["\"Be kind, rewind.\"", "— every VHS sticker ever"],
+  ["\"Don't have a cow, man.\"", "— Bart Simpson"],
+  ["\"It's all that and a bag of chips.\"", "— hallway slang, 1997"],
+  ["\"Wassup.\"", "— every phone call, 1999"]
+];
+let qi = 0;
+const qText = document.getElementById('quoteText');
+const qCite = document.getElementById('quoteCite');
+function rotateQuote(){
+  qText.style.opacity = 0;
+  qText.style.transform = 'translateY(8px)';
+  setTimeout(()=>{
+    qi = (qi+1) % quotes.length;
+    qText.textContent = quotes[qi][0];
+    qCite.textContent = quotes[qi][1];
+    qText.style.opacity = 1;
+    qText.style.transform = 'translateY(0)';
+  }, 400);
+}
+setInterval(rotateQuote, 4200);
+
+/* ===== pager popup ===== */
+const pager = document.getElementById('pager');
+function pingPager(){
+  pager.classList.add('show');
+  setTimeout(()=> pager.classList.remove('show'), 3200);
+}
+setTimeout(pingPager, 3000);
+setInterval(pingPager, 15000);
+
+/* ===== keyboard / click interaction: drop the beat ===== */
+const eqBars = document.querySelectorAll('.eq-bar');
+const boombox = document.getElementById('boombox');
+let dropping = false;
+function dropBeat(){
+  if(dropping) return;
+  dropping = true;
+  boombox.style.transition = 'transform .1s';
+  boombox.style.transform = 'scale(1.06) rotate(-1deg)';
+  eqBars.forEach(b=>{ b.style.animationDuration = '0.15s'; });
+  // little "whoosh" via WebAudio beep (no external asset needed)
+  try{
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = 'square';
+    o.frequency.setValueAtTime(120, ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.25);
+    g.gain.setValueAtTime(0.08, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(); o.stop(ctx.currentTime + 0.3);
+  }catch(e){}
+  setTimeout(()=>{
+    boombox.style.transform = 'scale(1) rotate(0deg)';
+    eqBars.forEach(b=>{ b.style.animationDuration = '0.9s'; });
+    dropping = false;
+  }, 700);
+}
+boombox.addEventListener('click', dropBeat);
+document.addEventListener('keydown', (e)=>{
+  if(e.code === 'Space'){ e.preventDefault(); dropBeat(); }
+});
+
+/* ===== EQ keyframe (since we used class not inline @keyframes for delay-driven bars) ===== */
+const styleTag = document.createElement('style');
+styleTag.innerHTML = `@keyframes eq{0%,100%{transform:scaleY(0.5);}50%{transform:scaleY(1.3);}}`;
+document.head.appendChild(styleTag);
+
+/* ===== YouTube playlist music player ===== */
+// Playlist source video (from provided link) used as the music source.
+const VIDEO_ID = "Xi6BjmipH58";
+let ytPlayer, ytReady=false, isPlaying=false, durSec=0;
+
+function onYouTubeIframeAPIReady(){
+  ytPlayer = new YT.Player('ytplayer', {
+    height:'1', width:'1', videoId: VIDEO_ID,
+    playerVars:{ autoplay:0, controls:0, disablekb:1, playsinline:1 },
+    events:{
+      onReady: ()=>{
+        ytReady = true;
+        document.getElementById('trackName').textContent = "90's Mixtape — Track 01";
+        document.getElementById('trackSub').textContent = "SIDE A • ready to jam";
+        updateDuration();
+      },
+      onStateChange: (e)=>{
+        if(e.data === YT.PlayerState.PLAYING){
+          isPlaying = true;
+          document.getElementById('playBtn').textContent = '⏸';
+          updateDuration();
+        } else if(e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED){
+          isPlaying = false;
+          document.getElementById('playBtn').textContent = '▶';
+        }
+      }
+    }
+  });
+}
+const tag = document.createElement('script');
+tag.src = "https://www.youtube.com/iframe_api";
+document.body.appendChild(tag);
+
+function fmt(t){
+  t = Math.floor(t||0);
+  const m = Math.floor(t/60), s = t%60;
+  return m + ':' + (s<10?'0':'') + s;
+}
+function updateDuration(){
+  if(ytPlayer && ytPlayer.getDuration){
+    durSec = ytPlayer.getDuration() || 0;
+    document.getElementById('durTime').textContent = fmt(durSec);
+  }
+}
+setInterval(()=>{
+  if(ytReady && ytPlayer.getCurrentTime){
+    const cur = ytPlayer.getCurrentTime() || 0;
+    if(!durSec) updateDuration();
+    document.getElementById('curTime').textContent = fmt(cur);
+    const pct = durSec ? (cur/durSec)*100 : 0;
+    document.getElementById('barFill').style.width = pct + '%';
+  }
+}, 500);
+
+document.getElementById('playBtn').addEventListener('click', ()=>{
+  if(!ytReady) return;
+  if(isPlaying){ ytPlayer.pauseVideo(); } else { ytPlayer.playVideo(); }
+});
+document.getElementById('nextBtn').addEventListener('click', ()=>{
+  if(!ytReady) return;
+  // loop back to start of track as "next" within single-video source
+  ytPlayer.seekTo(Math.min((ytPlayer.getCurrentTime()||0)+30, durSec-1), true);
+});
+document.getElementById('prevBtn').addEventListener('click', ()=>{
+  if(!ytReady) return;
+  ytPlayer.seekTo(Math.max((ytPlayer.getCurrentTime()||0)-30, 0), true);
+});
+document.getElementById('bar').addEventListener('click', (e)=>{
+  if(!ytReady || !durSec) return;
+  const rect = e.currentTarget.getBoundingClientRect();
+  const pct = (e.clientX - rect.left) / rect.width;
+  ytPlayer.seekTo(pct*durSec, true);
+});
+</script>
+</body>
+</html>
